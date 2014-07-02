@@ -4,6 +4,7 @@ import os
 import shutil
 import urllib.error
 import urllib.request
+import datetime
 
 """
 this python file downloads pic of the day published by NASA
@@ -22,15 +23,17 @@ class pic_downloader:
             response = urllib.request.urlopen(self.feed_url)
             html = response.read()
         except urllib.error.URLError:
-            print('connection error')
+            print('connection error 0')
             return
 
         html = html.decode('utf-8')
 
-        img = re.search(r'image/\d+/\w+_(\w+)_\d+.jpg', html)
+        img = re.search(r'image/\d+/.*?\.jpg', html)
 
         if img:
             return img
+        else:
+            print('image not found')
 
         return
 
@@ -43,8 +46,10 @@ class pic_downloader:
             pass
 
         img = self.get_img()
-        img_url = self.img_url + img.group(0)
-        img_name = img.group(1)+'.jpg'
+        img_url = self.img_url + img.group()
+        img_name = datetime.datetime.today().strftime('%Y-%m-%d')+'.jpg'
+        
+        
         img_path = os.path.join(directory, img_name)
 
         if not os.path.exists(img_path):
@@ -54,8 +59,12 @@ class pic_downloader:
                 img_file = open(img_path, 'wb')
                 shutil.copyfileobj(response, img_file)
                 img_file.close()
-            except (urllib.error.URLError, IOError):
-                        print('Connection error')
+            except urllib.error.URLError:
+                print('Connection error 1')
+            except IOError:
+                print('can\'t create file ')
+            
+                        
             
                     
                     
